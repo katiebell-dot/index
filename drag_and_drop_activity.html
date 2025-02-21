@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sort the Stats: Discrete vs. Continuous</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #001e43; /* AFC dark blue */
+            color: white;
+        }
+
+        h1 {
+            color: #e41f25; /* AFC red */
+        }
+
+        #drag-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .draggable {
+            padding: 10px;
+            background-color: #f9c74f; /* AFC gold */
+            border: 2px solid #e41f25; /* AFC red */
+            color: #001e43; /* AFC dark blue */
+            font-weight: bold;
+            cursor: grab;
+            width: 140px;
+            text-align: center;
+            border-radius: 5px;
+            margin: 5px;
+        }
+
+        #drop-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            gap: 50px;
+        }
+
+        .dropzone {
+            width: 250px; /* Increased width */
+            height: 300px; /* Increased height */
+            border: 2px dashed #001e43; /* AFC dark blue */
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #fff; /* white for contrast */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align items to the top */
+            color: #001e43; /* AFC dark blue */
+            overflow-y: auto; /* Allow scrolling if items overflow */
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #90be6d; /* complementary green */
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #feedback {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sort the Stats: Discrete vs. Continuous</h1>
+    <p>Drag each statistic below into the correct category. Click "Check Answers" when you're done.</p>
+
+    <div id="drag-container">
+        <div class="draggable" draggable="true" id="goals">3 goals</div>
+        <div class="draggable" draggable="true" id="height">192.5 cm</div>
+        <div class="draggable" draggable="true" id="tackles">8 tackles</div>
+        <div class="draggable" draggable="true" id="accuracy">75.6%</div>
+        <div class="draggable" draggable="true" id="distance">12.3 km</div>
+        <div class="draggable" draggable="true" id="games">22 games</div>
+        <div class="draggable" draggable="true" id="speed">25.4 km/h</div>
+        <div class="draggable" draggable="true" id="freeticks">5 free kicks</div>
+        <div class="draggable" draggable="true" id="temperature">28.6°C</div>
+    </div>
+
+    <div id="drop-container">
+        <div class="dropzone" id="discrete">
+            <h3>Discrete Data</h3>
+        </div>
+        <div class="dropzone" id="continuous">
+            <h3>Continuous Data</h3>
+        </div>
+    </div>
+
+    <button id="submit-btn">Check Answers</button>
+    <div id="feedback"></div>
+
+    <!-- Audio files for sound effects -->
+    <audio id="cheer-sound" src="https://www.soundjay.com/crowd/crowd-cheer-01.mp3"></audio>
+    <audio id="siren-sound" src="https://www.soundjay.com/misc/sounds/siren-01.mp3"></audio>
+
+    <script>
+        const draggables = document.querySelectorAll('.draggable');
+        const dropzones = document.querySelectorAll('.dropzone');
+
+        draggables.forEach(draggable => {
+            draggable.addEventListener('dragstart', () => {
+                draggable.classList.add('dragging');
+            });
+
+            draggable.addEventListener('dragend', () => {
+                draggable.classList.remove('dragging');
+            });
+        });
+
+        dropzones.forEach(dropzone => {
+            dropzone.addEventListener('dragover', e => {
+                e.preventDefault();
+                const draggable = document.querySelector('.dragging');
+                dropzone.appendChild(draggable);
+            });
+        });
+
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            const discreteZone = document.getElementById('discrete');
+            const continuousZone = document.getElementById('continuous');
+
+            const discreteAnswers = ['goals', 'tackles', 'games', 'freeticks'];
+            const continuousAnswers = ['height', 'accuracy', 'distance', 'speed', 'temperature'];
+
+            let score = 0;
+
+            discreteZone.childNodes.forEach(item => {
+                if (discreteAnswers.includes(item.id)) score++;
+            });
+
+            continuousZone.childNodes.forEach(item => {
+                if (continuousAnswers.includes(item.id)) score++;
+            });
+
+            const feedback = document.getElementById('feedback');
+            const cheerSound = document.getElementById('cheer-sound');
+            const sirenSound = document.getElementById('siren-sound');
+
+            if (score === discreteAnswers.length + continuousAnswers.length) {
+                feedback.textContent = `Perfect! You scored ${score} out of ${discreteAnswers.length + continuousAnswers.length}!`;
+                cheerSound.play();
+            } else {
+                feedback.textContent = `You scored ${score} out of ${discreteAnswers.length + continuousAnswers.length}. Try again!`;
+                sirenSound.play();
+            }
+        });
+    </script>
+</body>
+</html>
+
