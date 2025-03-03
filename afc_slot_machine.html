@@ -43,6 +43,13 @@
             text-align: center;
             transition: background-color 0.3s, color 0.3s;
         }
+        .flash {
+            animation: flash 0.5s infinite alternate;
+        }
+        @keyframes flash {
+            0% { background-color: #ffd700; color: #002b5c; }
+            100% { background-color: #e31837; color: #ffd700; }
+        }
         .category-title {
             font-size: 1.2em;
             color: #ffffff;
@@ -66,13 +73,6 @@
         .spin-button:hover {
             background-color: #ffd700;
             color: #002b5c;
-        }
-        .flash {
-            animation: flash 0.5s infinite alternate;
-        }
-        @keyframes flash {
-            0% { background-color: #ffd700; color: #002b5c; }
-            100% { background-color: #e31837; color: #ffd700; }
         }
         .confetti {
             position: absolute;
@@ -116,61 +116,52 @@
     
     <button class="spin-button" onclick="spinAll()">Spin</button>
     
-    <audio id="whistleSound" src="whistle.mp3"></audio>
-    <audio id="cheerSound" src="crowd-cheer.mp3"></audio>
-    
     <script>
-        const conditions = {
-            "Venue": ["Home", "Away"],
-            "Result": ["Win", "Loss"],
-            "Ground Size": ["Small", "Medium", "Large"],
-            "Crowd Size": ["Small", "Medium", "Large"],
-            "Rain": ["Yes", "No"]
-        };
-        
-        function getRandomCondition(category) {
-            return conditions[category][Math.floor(Math.random() * conditions[category].length)];
-        }
+        const allowedCombinations = [
+            ["Home", "Win", "Medium", "Large", "Yes"],
+            ["Home", "Win", "Medium", "Medium", "Yes"],
+            ["Home", "Win", "Medium", "Small", "No"],
+            ["Home", "Win", "Medium", "Small", "Yes"],
+            ["Home", "Loss", "Medium", "Large", "Yes"],
+            ["Home", "Loss", "Medium", "Large", "No"],
+            ["Home", "Loss", "Medium", "Medium", "No"],
+            ["Home", "Loss", "Medium", "Small", "Yes"],
+            ["Home", "Draw", "Medium", "Medium", "Yes"]
+        ];
 
         function spinAll() {
-            document.getElementById("whistleSound").play();
-            const slots = [
-                { id: "venueSlot", category: "Venue" },
-                { id: "resultSlot", category: "Result" },
-                { id: "groundSlot", category: "Ground Size" },
-                { id: "crowdSlot", category: "Crowd Size" },
-                { id: "rainSlot", category: "Rain" }
-            ];
+            let counter = 0;
+            let speed = 50;
+            const slots = ["venueSlot", "resultSlot", "groundSlot", "crowdSlot", "rainSlot"];
+            const randomIndex = Math.floor(Math.random() * allowedCombinations.length);
+            const selectedCombination = allowedCombinations[randomIndex];
             
-            slots.forEach((slot, index) => {
-                let speed = 50;
-                let counter = 0;
-                const spinInterval = setInterval(() => {
-                    document.getElementById(slot.id).textContent = getRandomCondition(slot.category);
-                    counter++;
-                    if (counter >= 20) { 
-                        speed += 200;
-                    }
-                    if (counter >= 30) { 
-                        clearInterval(spinInterval);
-                        document.getElementById(slot.id).textContent = getRandomCondition(slot.category);
-                        document.getElementById(slot.id).classList.add("flash");
-                    }
-                }, speed);
-            });
-
-            setTimeout(() => {
-                document.getElementById("cheerSound").play();
-                for (let i = 0; i < 150; i++) {
-                    let confetti = document.createElement("div");
-                    confetti.classList.add("confetti");
-                    confetti.style.left = Math.random() * 100 + "vw";
-                    confetti.style.backgroundColor = ["gold", "red", "white"][Math.floor(Math.random() * 3)];
-                    document.body.appendChild(confetti);
-                    setTimeout(() => confetti.remove(), 3000);
+            const spinInterval = setInterval(() => {
+                slots.forEach(slot => {
+                    document.getElementById(slot).textContent = allowedCombinations[Math.floor(Math.random() * allowedCombinations.length)][slots.indexOf(slot)];
+                });
+                counter++;
+                if (counter >= 20) speed += 200;
+                if (counter >= 30) {
+                    clearInterval(spinInterval);
+                    slots.forEach((slot, index) => {
+                        document.getElementById(slot).textContent = selectedCombination[index];
+                        document.getElementById(slot).classList.add("flash");
+                    });
+                    dropConfetti();
                 }
-                document.querySelectorAll('.flash').forEach(el => el.classList.remove('flash'));
-            }, 11000);
+            }, speed);
+        }
+
+        function dropConfetti() {
+            for (let i = 0; i < 150; i++) {
+                let confetti = document.createElement("div");
+                confetti.classList.add("confetti");
+                confetti.style.left = Math.random() * 100 + "vw";
+                confetti.style.backgroundColor = ["gold", "red", "white"][Math.floor(Math.random() * 3)];
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
         }
     </script>
 </body>
