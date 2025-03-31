@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Where is Wayne? - Interactive AFL Movement Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            margin: 0;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .main-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .side-content {
+            width: 24%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .side-image {
+            width: 100%;
+            height: auto;
+            max-height: 300px;
+            object-fit: contain;
+        }
+        
+        .side-text {
+            color: #002B5C;
+            font-weight: bold;
+            margin-top: 5px;
+            font-size: 16px;
+            text-align: center;
+        }
+        
+        .center-content {
+            width: 52%;
+        }
+        
+        .field-container {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        #field {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        #wayne {
+            position: absolute;
+            width: 80px;
+            height: auto;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        
+        .position-marker {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background-color: white;
+            border: 2px solid #002B5C;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+        
+        .trail {
+            position: absolute;
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        .controls {
+            margin: 10px 0;
+        }
+        
+        .quarter-selection {
+            margin-bottom: 5px;
+        }
+        
+        .btn {
+            background-color: #002B5C; /* Adelaide Crows dark blue */
+            color: white;
+            border: 2px solid #FFCD00; /* Adelaide Crows yellow */
+            padding: 6px 12px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #003D7C;
+        }
+        
+        .btn:disabled {
+            background-color: #999;
+            border-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        select {
+            padding: 6px;
+            border-radius: 5px;
+            border: 2px solid #002B5C;
+        }
+        
+        .position-indicator {
+            margin: 5px 0;
+            font-weight: bold;
+        }
+        
+        .scale-info {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="quarter-selection">
+            <label for="quarter">Select Quarter: </label>
+            <select id="quarter" onchange="changeQuarter()">
+                <option value="1">Quarter 1</option>
+                <option value="2">Quarter 2</option>
+                <option value="3">Quarter 3</option>
+                <option value="4">Quarter 4</option>
+            </select>
+        </div>
+        
+        <div class="position-indicator" id="positionIndicator">Position: 0 of 4</div>
+        
+        <div class="main-content">
+            <div class="side-content">
+                <img class="side-image" src="wayne_milera.png" alt="Wayne Milera">
+                <div class="side-text">Where is Wayne?</div>
+            </div>
+            
+            <div class="center-content">
+                <div class="field-container">
+                    <img id="field" src="afl_field.png" alt="AFL Field">
+                    <img id="wayne" src="wayne_milera.png" alt="Wayne Milera" style="display: none;">
+                    <svg class="trail" id="trail" width="100%" height="100%" style="position: absolute; top: 0; left: 0;"></svg>
+                </div>
+            </div>
+            
+            <div class="side-content">
+                <img class="side-image" src="wayne_milera.png" alt="Wayne Milera">
+                <div class="side-text">Interactive Movement<br>STEM Tracker</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" id="startBtn" onclick="startPositions()">Start</button>
+            <button class="btn" id="prevBtn" onclick="prevPosition()" disabled>Previous</button>
+            <button class="btn" id="nextBtn" onclick="nextPosition()" disabled>Next</button>
+            <button class="btn" id="resetBtn" onclick="resetPositions()" disabled>Reset</button>
+        </div>
+        
+        <div class="scale-info">
+            <p>Scale: 1cm = 100m (Use a ruler to measure distances between positions)</p>
+        </div>
+    </div>
+
+    <script>
+        // Positions for each quarter (x and y percentages of field width/height)
+        const quarterPositions = {
+            1: [
+                { x: 50, y: 50 },  // S - Start
+                { x: 70, y: 30 },  // 1
+                { x: 30, y: 40 },  // 2
+                { x: 60, y: 65 },  // 3
+                { x: 40, y: 75 }   // 4 - Adjusted position to be more to the left
+            ],
+            2: [
+                { x: 40, y: 45 },  // S - Start
+                { x: 75, y: 55 },  // 1
+                { x: 65, y: 25 },  // 2
+                { x: 35, y: 65 },  // 3
+                { x: 45, y: 30 }   // 4 - Adjusted position to be more to the left
+            ],
+            3: [
+                { x: 45, y: 55 },  // S - Start
+                { x: 25, y: 25 },  // 1
+                { x: 60, y: 40 },  // 2
+                { x: 80, y: 70 },  // 3
+                { x: 30, y: 25 }   // 4 - Adjusted position to be more to the left
+            ],
+            4: [
+                { x: 55, y: 45 },  // S - Start
+                { x: 35, y: 35 },  // 1
+                { x: 70, y: 60 },  // 2
+                { x: 50, y: 75 },  // 3
+                { x: 20, y: 60 }   // 4 - Adjusted position to be more to the left
+            ]
+        };
+
+        let currentQuarter = 1;
+        let currentPosition = 0;
+        let positions = [];
+        let markers = [];
+        
+        // Initialize when page loads
+        window.onload = function() {
+            positions = quarterPositions[currentQuarter];
+            updatePositionIndicator();
+        };
+        
+        // Start showing positions
+        function startPositions() {
+            document.getElementById('wayne').style.display = 'block';
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('resetBtn').disabled = false;
+            document.getElementById('nextBtn').disabled = false;
+            showPosition(0);
+        }
+        
+        // Reset all positions
+        function resetPositions() {
+            // Clear markers
+            markers.forEach(marker => {
+                if (marker && marker.parentNode) {
+                    marker.parentNode.removeChild(marker);
+                }
+            });
+            markers = [];
+            
+            // Clear trails
+            const trailSvg = document.getElementById('trail');
+            while (trailSvg.firstChild) {
+                trailSvg.removeChild(trailSvg.firstChild);
+            }
+            
+            // Reset position
+            currentPosition = 0;
+            document.getElementById('wayne').style.display = 'none';
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('prevBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('resetBtn').disabled = true;
+            updatePositionIndicator();
+        }
+        
+        // Show Wayne at a specific position
+        function showPosition(index) {
+            if (index < 0 || index >= positions.length) return;
+            
+            currentPosition = index;
+            updatePositionIndicator();
+            
+            const wayne = document.getElementById('wayne');
+            const fieldContainer = document.querySelector('.field-container');
+            const fieldWidth = document.getElementById('field').offsetWidth;
+            const fieldHeight = document.getElementById('field').offsetHeight;
+            
+            // Position Wayne
+            const pos = positions[index];
+            const xPos = (pos.x / 100) * fieldWidth;
+            const yPos = (pos.y / 100) * fieldHeight;
+            
+            wayne.style.left = xPos + 'px';
+            wayne.style.top = yPos + 'px';
+            
+            // Add position marker if not already there
+            if (!markers[index]) {
+                const marker = document.createElement('div');
+                marker.className = 'position-marker';
+                // Use "S" for the first position, numbers for the rest
+                marker.textContent = index === 0 ? "S" : index;
+                marker.style.left = xPos + 'px';
+                marker.style.top = yPos + 'px';
+                fieldContainer.appendChild(marker);
+                markers[index] = marker;
+            }
+            
+            // Draw trail if moving to position > 0
+            if (index > 0) {
+                const prevPos = positions[index - 1];
+                const prevX = (prevPos.x / 100) * fieldWidth;
+                const prevY = (prevPos.y / 100) * fieldHeight;
+                
+                const trailSvg = document.getElementById('trail');
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', prevX);
+                line.setAttribute('y1', prevY);
+                line.setAttribute('x2', xPos);
+                line.setAttribute('y2', yPos);
+                line.setAttribute('stroke', '#FFCD00'); // Adelaide Crows yellow
+                line.setAttribute('stroke-width', '3');
+                line.setAttribute('stroke-dasharray', '5,5');
+                trailSvg.appendChild(line);
+            }
+            
+            // Update button states
+            document.getElementById('prevBtn').disabled = (index === 0);
+            document.getElementById('nextBtn').disabled = (index === positions.length - 1);
+        }
+        
+        // Move to next position
+        function nextPosition() {
+            if (currentPosition < positions.length - 1) {
+                showPosition(currentPosition + 1);
+            }
+        }
+        
+        // Move to previous position
+        function prevPosition() {
+            if (currentPosition > 0) {
+                showPosition(currentPosition - 1);
+            }
+        }
+        
+        // Change to a different quarter
+        function changeQuarter() {
+            currentQuarter = parseInt(document.getElementById('quarter').value);
+            positions = quarterPositions[currentQuarter];
+            resetPositions();
+        }
+        
+        // Update position indicator text
+        function updatePositionIndicator() {
+            const indicator = document.getElementById('positionIndicator');
+            if (currentPosition === 0 && document.getElementById('wayne').style.display === 'none') {
+                indicator.textContent = 'Position: 0 of 4';
+            } else {
+                // Adjust the display to show S, 1, 2, 3, 4 instead of 1, 2, 3, 4, 5
+                const positionDisplay = currentPosition === 0 ? "S" : currentPosition;
+                indicator.textContent = `Position: ${positionDisplay} of 4`;
+            }
+        }
+    </script>
+</body>
+</html>
