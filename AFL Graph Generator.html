@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a4175, #0d2038);
+            color: #FFFFFF;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+            padding: 20px;
+            background-color: lightslategrey;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            width: 80px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: #fdb714;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-size: 2.5em;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .control-group {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-group:hover {
+            transform: translateY(-5px);
+            background: rgba(26, 65, 117, 0.4);
+        }
+
+        .control-group input,
+        .control-group select,
+        .average-data-table input {
+            width: calc(100% - 16px);
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #FFFFFF;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            height: 45px;
+            font-size: 16px;
+        }
+
+        .control-group input::placeholder,
+        .control-group select::placeholder,
+        .average-data-table input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .control-group input:focus,
+        .control-group select:focus,
+        .average-data-table input:focus {
+            outline: none;
+            border-color: #fdb714;
+            box-shadow: 0 0 5px rgba(253, 183, 20, 0.5);
+        }
+
+        .control-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 20px;
+            padding-right: 40px;
+        }
+
+        .control-group select option {
+            background: #1a4175;
+            color: #FFFFFF;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #fdb714;
+            font-weight: bold;
+        }
+
+        button {
+            background: #ed1b2e;
+            color: #FFFFFF;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: #ff2d40;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(237, 27, 46, 0.5);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 500px;
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .axis-labels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .axis-labels input {
+            width: calc(100% - 16px);
+            box-sizing: border-box;
+        }
+
+        #graphTitle {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .chart-container canvas {
+            filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.3));
+        }
+
+        .tooltip {
+            display: inline-block;
+            position: relative;
+            cursor: help;
+            color: #fdb714;
+            margin-left: 5px;
+            font-size: 14px;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: rgba(13, 32, 56, 0.95);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid rgba(253, 183, 20, 0.5);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: rgba(253, 183, 20, 0.5) transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .player-selection {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .player-selection h3 {
+            color: #fdb714;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .player-entry {
+            display: grid;
+            grid-template-columns: 120px minmax(200px, 1fr);
+            align-items: center;
+            gap: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 5px;
+        }
+
+        .player-entry input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #FFFFFF;
+            font-size: 16px;
+            box-sizing: border-box;
+            height: 45px;
+        }
+
+        .player-entry input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .player-entry input:focus {
+            outline: none;
+            border-color: #fdb714;
+            box-shadow: 0 0 5px rgba(253, 183, 20, 0.5);
+        }
+
+        .player-number {
+            color: #fdb714;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .average-data-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .average-data-table th,
+        .average-data-table td {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .average-data-table th {
+            color: #fdb714;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .average-data-table td:first-child {
+            text-align: left;
+            font-weight: bold;
+            color: #fdb714;
+            width: 150px;
+        }
+
+        .average-data-table input[type="number"] {
+            width: 80px;
+            padding: 8px;
+            height: auto;
+            margin: 0 auto;
+            display: block;
+            text-align: center;
+        }
+
+        .graph-selectors {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="foundation_logo.png" alt="Crows Foundation Logo" class="logo">
+            <h1>Graph Generator</h1>
+            <img src="crow_logo.png" alt="Adelaide Crows Logo" class="logo">
+        </div>
+
+        <h2 style="color: #fdb714; font-size: 1.8em; margin-bottom: 15px; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);">Input Player Data</h2>
+        <div class="how-to">
+            <h3>What do I do?</h3>
+            <ul>
+                <li>Enter the names for your 4 AFL players</li>
+                <li>Enter the names for the 2 statistics your group chose to track</li>
+                <li>Enter the calculated average for each player for both statistics</li>
+                <li>Add a title for your graph</li>
+                <li>Click "Generate Graph"</li>
+            </ul>
+        </div>
+
+        <div class="controls">
+            <div class="player-selection">
+                <h3>Players</h3>
+                <div id="playersList" class="players-list">
+                    <div class="player-entry">
+                        <div class="player-number">Player 1</div>
+                        <input type="text" id="playerName1" placeholder="Enter player 1 name">
+                    </div>
+                    <div class="player-entry">
+                        <div class="player-number">Player 2</div>
+                        <input type="text" id="playerName2" placeholder="Enter player 2 name">
+                    </div>
+                    <div class="player-entry">
+                        <div class="player-number">Player 3</div>
+                        <input type="text" id="playerName3" placeholder="Enter player 3 name">
+                    </div>
+                    <div class="player-entry">
+                        <div class="player-number">Player 4</div>
+                        <input type="text" id="playerName4" placeholder="Enter player 4 name">
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="stat1Name">Statistic 1 Name</label>
+                <input type="text" id="stat1Name" placeholder="Enter name for statistic 1">
+            </div>
+
+            <div class="control-group">
+                <label for="stat2Name">Statistic 2 Name</label>
+                <input type="text" id="stat2Name" placeholder="Enter name for statistic 2">
+            </div>
+
+            <div class="control-group">
+                <h3>Enter Player Averages</h3>
+                <table class="average-data-table" id="averageDataTable">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th id="stat1Header">Statistic 1</th>
+                            <th id="stat2Header">Statistic 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Player 1</td>
+                            <td><input type="number" id="p1s1Avg" value="0" min="0"></td>
+                            <td><input type="number" id="p1s2Avg" value="0" min="0"></td>
+                        </tr>
+                        <tr>
+                            <td>Player 2</td>
+                            <td><input type="number" id="p2s1Avg" value="0" min="0"></td>
+                            <td><input type="number" id="p2s2Avg" value="0" min="0"></td>
+                        </tr>
+                        <tr>
+                            <td>Player 3</td>
+                            <td><input type="number" id="p3s1Avg" value="0" min="0"></td>
+                            <td><input type="number" id="p3s2Avg" value="0" min="0"></td>
+                        </tr>
+                        <tr>
+                            <td>Player 4</td>
+                            <td><input type="number" id="p4s1Avg" value="0" min="0"></td>
+                            <td><input type="number" id="p4s2Avg" value="0" min="0"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="control-group axis-labels">
+                <div style="grid-column: 1 / -1;">
+                    <label for="graphTitle">Graph Title</label>
+                    <input type="text" id="graphTitle" placeholder="Enter graph title">
+                </div>
+                <div>
+                    <label for="xAxisLabel">X-Axis Label</label>
+                    <input type="text" id="xAxisLabel" placeholder="X-axis label (auto-set)" value="Player" readonly>
+                </div>
+                <div>
+                    <label for="yAxisLabel">Y-Axis Label</label>
+                    <input type="text" id="yAxisLabel" placeholder="Y-axis label (auto-set)" value="Average Result" readonly>
+                </div>
+            </div>
+
+            <button onclick="generateGraph()">Generate Graph</button>
+        </div>
+
+        <h2 style="color: #fdb714; font-size: 1.8em; margin-bottom: 15px; margin-top: 40px; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);">View Graph</h2>
+
+        <div class="graph-selectors control-group">
+            <div>
+                <label for="graphViewSelect">Graph View</label>
+                <select id="graphViewSelect">
+                    <option value="stat1">Statistic 1 Comparison</option>
+                    <option value="stat2">Statistic 2 Comparison</option>
+                    <option value="combined">Combined Statistics Comparison</option>
+                </select>
+            </div>
+            <div>
+                <label for="graphTypeSelect">Graph Type</label>
+                <select id="graphTypeSelect">
+                    <option value="bar">Bar Chart</option>
+                    <option value="line">Line Graph</option>
+                    <option value="scatter">Scatter Plot</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let myChart = null;
+        const defaultColors = [
+            '#fdb714', // Gold
+            '#ed1b2e', // Red
+            '#5dade2', // Changed to Lighter Blue
+            '#4ecdc4', // Teal
+            '#ff6b6b', // Coral
+            '#9b59b6', // Purple
+            '#ffd93d', // Yellow
+            '#96ceb4'  // Mint
+        ];
+
+        function updateTableHeaders() {
+            const stat1Name = document.getElementById('stat1Name').value || 'Statistic 1';
+            const stat2Name = document.getElementById('stat2Name').value || 'Statistic 2';
+            document.getElementById('stat1Header').textContent = stat1Name;
+            document.getElementById('stat2Header').textContent = stat2Name;
+            updateAxisLabels();
+            if(myChart) {
+                generateGraph();
+            }
+        }
+
+        function updateAxisLabels() {
+            const graphView = document.getElementById('graphViewSelect').value;
+            const graphType = document.getElementById('graphTypeSelect').value;
+            const stat1Name = document.getElementById('stat1Name').value || 'Statistic 1';
+            const stat2Name = document.getElementById('stat2Name').value || 'Statistic 2';
+            const xAxisInput = document.getElementById('xAxisLabel');
+            const yAxisInput = document.getElementById('yAxisLabel');
+
+            if (graphView === 'combined' && graphType === 'scatter') {
+                xAxisInput.value = stat1Name;
+                yAxisInput.value = stat2Name;
+            } else {
+                xAxisInput.value = "Player";
+                yAxisInput.value = "Average Result";
+            }
+        }
+
+        function toggleScatterOption() {
+            const graphView = document.getElementById('graphViewSelect').value;
+            const graphTypeSelect = document.getElementById('graphTypeSelect');
+            const scatterOption = graphTypeSelect.querySelector('option[value="scatter"]');
+
+            if (graphView === 'stat1' || graphView === 'stat2') {
+                scatterOption.disabled = true;
+                if (graphTypeSelect.value === 'scatter') {
+                    graphTypeSelect.value = 'bar';
+                }
+            } else {
+                scatterOption.disabled = false;
+            }
+            updateAxisLabels();
+            if(myChart) {
+                generateGraph();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('stat1Name').addEventListener('input', updateTableHeaders);
+            document.getElementById('stat2Name').addEventListener('input', updateTableHeaders);
+
+            document.getElementById('graphViewSelect').addEventListener('change', toggleScatterOption);
+            document.getElementById('graphTypeSelect').addEventListener('change', () => {
+                updateAxisLabels();
+                if (myChart) generateGraph();
+             });
+
+            updateTableHeaders();
+            toggleScatterOption();
+        });
+
+        function generateGraph() {
+            const graphView = document.getElementById('graphViewSelect').value;
+            const graphType = document.getElementById('graphTypeSelect').value;
+            const graphTitle = document.getElementById('graphTitle').value || 'Player Statistics Comparison';
+
+            const playerNames = [
+                document.getElementById('playerName1').value || 'Player 1',
+                document.getElementById('playerName2').value || 'Player 2',
+                document.getElementById('playerName3').value || 'Player 3',
+                document.getElementById('playerName4').value || 'Player 4'
+            ];
+
+            const stat1Name = document.getElementById('stat1Name').value || 'Statistic 1';
+            const stat2Name = document.getElementById('stat2Name').value || 'Statistic 2';
+
+            const p1s1Avg = parseFloat(document.getElementById('p1s1Avg').value) || 0;
+            const p1s2Avg = parseFloat(document.getElementById('p1s2Avg').value) || 0;
+            const p2s1Avg = parseFloat(document.getElementById('p2s1Avg').value) || 0;
+            const p2s2Avg = parseFloat(document.getElementById('p2s2Avg').value) || 0;
+            const p3s1Avg = parseFloat(document.getElementById('p3s1Avg').value) || 0;
+            const p3s2Avg = parseFloat(document.getElementById('p3s2Avg').value) || 0;
+            const p4s1Avg = parseFloat(document.getElementById('p4s1Avg').value) || 0;
+            const p4s2Avg = parseFloat(document.getElementById('p4s2Avg').value) || 0;
+
+            let chartType = graphType;
+            let labels = [];
+            let datasets = [];
+            let xAxisLabel = "Player";
+            let yAxisLabel = "Average Result";
+
+            if (graphView === 'stat1') {
+                if (chartType === 'scatter') chartType = 'bar';
+                labels = playerNames;
+                datasets = [{
+                    label: stat1Name,
+                    data: [p1s1Avg, p2s1Avg, p3s1Avg, p4s1Avg],
+                    backgroundColor: defaultColors.map(c => `${c}99`),
+                    borderColor: defaultColors,
+                    borderWidth: (chartType === 'line') ? 2 : 1,
+                    pointBackgroundColor: defaultColors,
+                    pointRadius: (chartType === 'line') ? 5 : 0,
+                    pointHoverRadius: (chartType === 'line') ? 8 : 0,
+                }];
+            } else if (graphView === 'stat2') {
+                 if (chartType === 'scatter') chartType = 'bar';
+                 labels = playerNames;
+                 datasets = [{
+                     label: stat2Name,
+                     data: [p1s2Avg, p2s2Avg, p3s2Avg, p4s2Avg],
+                     backgroundColor: defaultColors.map(c => `${c}99`),
+                     borderColor: defaultColors,
+                     borderWidth: (chartType === 'line') ? 2 : 1,
+                     pointBackgroundColor: defaultColors,
+                     pointRadius: (chartType === 'line') ? 5 : 0,
+                     pointHoverRadius: (chartType === 'line') ? 8 : 0,
+                 }];
+            } else {
+                if (chartType === 'scatter') {
+                    xAxisLabel = stat1Name;
+                    yAxisLabel = stat2Name;
+                    datasets = [{
+                        label: 'Player Performance',
+                        data: [
+                            { x: p1s1Avg, y: p1s2Avg, label: playerNames[0] },
+                            { x: p2s1Avg, y: p2s2Avg, label: playerNames[1] },
+                            { x: p3s1Avg, y: p3s2Avg, label: playerNames[2] },
+                            { x: p4s1Avg, y: p4s2Avg, label: playerNames[3] },
+                        ],
+                        backgroundColor: defaultColors.map(c => `${c}CC`),
+                        borderColor: defaultColors,
+                        pointRadius: 8,
+                        pointHoverRadius: 12,
+                    }];
+                    labels = playerNames;
+                } else {
+                    labels = playerNames;
+                    datasets = [
+                        {
+                            label: stat1Name,
+                            data: [p1s1Avg, p2s1Avg, p3s1Avg, p4s1Avg],
+                            backgroundColor: `${defaultColors[0]}99`,
+                            borderColor: defaultColors[0],
+                            borderWidth: (chartType === 'line') ? 2 : 1,
+                            pointBackgroundColor: defaultColors[0],
+                            pointRadius: (chartType === 'line') ? 5 : 0,
+                            pointHoverRadius: (chartType === 'line') ? 8 : 0,
+                            yAxisID: 'y',
+                        },
+                        {
+                            label: stat2Name,
+                            data: [p1s2Avg, p2s2Avg, p3s2Avg, p4s2Avg],
+                            backgroundColor: `${defaultColors[1]}99`,
+                            borderColor: defaultColors[1],
+                            borderWidth: (chartType === 'line') ? 2 : 1,
+                            pointBackgroundColor: defaultColors[1],
+                            pointRadius: (chartType === 'line') ? 5 : 0,
+                            pointHoverRadius: (chartType === 'line') ? 8 : 0,
+                             yAxisID: 'y',
+                        }
+                    ];
+                }
+            }
+
+            document.getElementById('xAxisLabel').value = xAxisLabel;
+            document.getElementById('yAxisLabel').value = yAxisLabel;
+
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            const ctx = document.getElementById('myChart').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: (chartType === 'scatter') ? null : labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: yAxisLabel,
+                                color: 'white',
+                                font: { size: 14 }
+                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: 'white' }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: xAxisLabel,
+                                color: 'white',
+                                font: { size: 14 }
+                            },
+                             type: (chartType === 'scatter') ? 'linear' : 'category',
+                             position: (chartType === 'scatter') ? 'bottom' : undefined,
+                             grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                             ticks: {
+                                 color: 'white',
+                                 display: chartType !== 'scatter',
+                                 callback: (chartType === 'scatter') ? undefined : function(value, index, values) {
+                                     return playerNames[index];
+                                 }
+                             }
+                        }
+                    },
+                    plugins: {
+                         tooltip: {
+                             callbacks: {
+                                 title: function(tooltipItems) {
+                                     if (chartType === 'scatter' && tooltipItems.length > 0) {
+                                         return tooltipItems[0].raw.label || '';
+                                     }
+                                     return tooltipItems[0]?.label || '';
+                                 },
+                                 label: function(context) {
+                                     let label = context.dataset.label || '';
+                                     if (chartType === 'scatter') {
+                                          const stat1 = context.chart.options.scales.x.title.text;
+                                         const stat2 = context.chart.options.scales.y.title.text;
+                                         const xVal = context.parsed.x;
+                                         const yVal = context.parsed.y;
+                                         return [`${stat1}: ${xVal}`, `${stat2}: ${yVal}`];
+                                     } else {
+                                         if (label) {
+                                             label += ': ';
+                                         }
+                                         if (context.parsed.y !== null) {
+                                             label += context.parsed.y;
+                                         }
+                                         return label;
+                                     }
+                                 }
+                             },
+                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                             titleColor: '#ffd700',
+                             bodyColor: 'white',
+                             padding: 10,
+                             usePointStyle: chartType === 'scatter',
+                         },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: 'white',
+                                font: { size: 12 },
+                                padding: 20,
+                                usePointStyle: chartType !== 'bar',
+                                pointStyle: (chartType === 'line') ? 'line' : (chartType === 'scatter' ? 'circle' : 'rect'),
+                                boxWidth: (chartType === 'bar') ? 20 : 10
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: graphTitle,
+                            color: '#ffd700',
+                            font: {
+                                size: 24,
+                                weight: 'bold',
+                                family: "'Arial', sans-serif"
+                            },
+                            padding: { top: 10, bottom: 20 }
+                        },
+                    },
+                    layout: {
+                        padding: {
+                            top: 0,
+                            right: 10,
+                            bottom: 0,
+                            left: 0
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html> 
