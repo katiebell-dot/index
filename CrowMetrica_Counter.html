@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)https://katiebell-dot.github.io/index/2afc-counter.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrowMetrica Counter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #EAC435; /* Softer Gold */
+            --secondary-color: #C62828; /* Darker/Softer Red */
+            --accent-color: #ffd700; /* Keep Yellow for specific accents */
+            /* --background-color: #F8F9FA; Removed, applying gradient to body */
+            --text-color: #FFFFFF; /* White text */
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --container-bg: rgba(26, 65, 117, 0.4); /* Slightly more opaque blue */
+            --card-bg: rgba(255, 255, 255, 0.08); /* Slightly more opaque card bg */
+            --border-color: rgba(255, 255, 255, 0.15); /* Subtler border */
+            --border-radius: 10px; /* Adjusted border radius */
+            --box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Softer shadow */
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body { 
+            text-align: center; 
+            font-family: 'Arial', sans-serif; /* Changed font */
+            background: linear-gradient(135deg, #1a4175, #0d2038); /* Dark blue gradient */
+            color: var(--text-color);
+            padding: 20px; /* Added padding to body */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Removed fullscreen body class styles as container handles fullscreen */
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center the content horizontally */
+            /* background: linear-gradient(135deg, #f8f9fa, #e9ecef); Light grey gradient */
+            background: linear-gradient(135deg, rgba(248, 249, 250, 0.7), rgba(233, 236, 239, 0.7)); /* Semi-transparent light grey */
+            padding: 20px 0; /* Adjusted padding */
+            border-radius: var(--border-radius); /* Restore border radius */
+            box-shadow: var(--box-shadow); /* Restore subtle shadow */
+            margin-bottom: 25px; 
+            border-bottom: none; /* Removed bottom border */
+            position: relative; /* Needed for absolute positioning of button */
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 25px; /* Adjusted gap */
+            /* No specific justification needed here as .header handles centering */
+        }
+
+        .header img {
+            width: auto; 
+            height: 65px; /* Increased logo height */
+            object-fit: contain; 
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3)); /* Removed light glow */
+        }
+
+        .header h1 {
+            font-size: 2.5em; 
+            color: #0d2038; /* Dark blue text for light background */
+            margin: 0;
+            font-weight: 600; 
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Lighter shadow for light bg */
+            letter-spacing: 1px; 
+        }
+
+        .fullscreen-btn {
+            position: absolute; /* Position absolutely */
+            top: 15px; /* Adjust position */
+            right: 15px; /* Adjust position */
+            background: var(--secondary-color); 
+            color: var(--text-color);
+            border: none;
+            padding: 8px 16px; 
+            border-radius: 5px; /* Smaller radius */
+            cursor: pointer;
+            font-size: 0.9em; 
+            font-weight: bold;
+            transition: var(--transition);
+            text-transform: uppercase; /* Uppercase text */
+            letter-spacing: 1px;
+        }
+
+        .fullscreen-btn:hover {
+            background: #E53935; /* Corresponding lighter softer red */
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(229, 57, 53, 0.4); /* Adjusted shadow color */
+        }
+
+        .input-container {
+            background: var(--container-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr; /* Ensure 3 equal columns */
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        /* Style for Player Name Input (Optional) - Removing specific layout rules */
+        #player-name-input label,
+        .input-group label { /* Applied gold color to all labels */
+            font-weight: bold; /* Bolder labels */
+            color: var(--primary-color);
+            font-size: 0.9em;
+        }
+        #player-name-input input {
+             border-color: var(--primary-color); /* Highlight player name input */
+        }
+
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(234, 196, 53, 0.5); /* Adjusted focus glow color */
+        }
+
+        .add-statistic-btn { 
+            background: var(--secondary-color); /* Use softer red */
+            color: var(--text-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: auto; /* Fit content */
+            max-width: none;
+            margin: 10px auto 0 auto; /* Adjusted margin */
+            display: inline-block; /* Changed display */
+            transition: var(--transition);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .add-statistic-btn:hover { 
+            background: #E53935; /* Corresponding lighter softer red */
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(229, 57, 53, 0.4); /* Adjusted shadow color */
+        }
+
+        .statistic-container { 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .statistic { 
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--border-color);
+            border-left-width: 6px; /* Keep colored border */
+            transition: var(--transition);
+            transform: translateY(0);
+            position: relative;
+        }
+        
+        .statistic:hover {
+             transform: translateY(-5px);
+        }
+
+        .remove-statistic { 
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--secondary-color); /* Use softer red */
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .statistic:hover .remove-statistic { 
+            opacity: 1;
+        }
+
+        .remove-statistic:hover { 
+            transform: scale(1.1);
+            background: #E53935; /* Corresponding lighter softer red */
+        }
+
+        .statistic h2 { 
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: var(--primary-color); /* Use softer gold for stat name */
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .statistic-display { 
+            font-size: 3em;
+            font-weight: 700;
+            /* Color is set dynamically by JS, ensure it's bright */
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); /* Add glow */
+        }
+
+        .statistic-display.pop { 
+            transform: scale(1.2);
+        }
+
+        .statistic-display.increment {
+             /* Use selected color, maybe add brightness filter? */
+             filter: brightness(1.2);
+        }
+
+        .statistic-display.decrement {
+             /* Use selected color, maybe add brightness filter? */
+             filter: brightness(1.2);
+        }
+
+        .statistic-buttons { 
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .statistic-btn { 
+            /* Background set dynamically */
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+        }
+
+        .statistic-btn:hover { 
+            filter: brightness(1.1); /* Brighten on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .statistic-btn:active { 
+            transform: translateY(0);
+            filter: brightness(0.9);
+        }
+
+        .log-game-btn {
+            background: var(--secondary-color); /* Use softer red */
+            color: var(--text-color);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 20px 0;
+            width: auto; /* Fit content */
+            transition: var(--transition);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+
+        .log-game-btn:hover {
+            background: #E53935; /* Corresponding lighter softer red */
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(229, 57, 53, 0.4); /* Adjusted shadow color */
+        }
+
+        #game-results-table {
+            width: 100%;
+            background: transparent; /* Remove table background color */
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-top: 25px;
+            border: 1px solid var(--border-color);
+            border-collapse: collapse; /* Ensure borders combine */
+        }
+
+        #game-results-table th {
+            background: var(--secondary-color); /* Use softer red */
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold; /* Bolder header */
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #game-results-table td {
+            background: var(--card-bg); /* Use card background */
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            color: var(--text-color);
+            border: 1px solid var(--border-color); /* Add border to cells */
+        }
+        
+        #game-results-table tr:hover td {
+            background: rgba(255, 255, 255, 0.12); /* Slightly more opaque hover */
+        }
+
+        /* Adjust highlight colors for better contrast if needed */
+        #game-results-table td.highlight {
+            background-color: rgba(234, 196, 53, 0.5); /* Softer gold highlight */
+            color: #0d2038; /* Dark text for gold */
+            font-weight: bold;
+        }
+
+        #game-results-table td.highlight-average {
+            background-color: rgba(255, 215, 0, 0.6); /* Softer yellow highlight */
+            color: #0d2038; /* Dark text for yellow */
+            font-weight: bold;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0; /* Removed padding */
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column; /* Keep column layout for mobile */
+                gap: 15px; 
+                text-align: center;
+                padding: 15px 0; /* Adjusted mobile padding */
+                border-bottom: none;
+            }
+            
+            .header-left {
+                flex-direction: row; /* Keep logos/title in a row on mobile */
+                justify-content: center; /* Center the row */
+                gap: 15px; 
+            }
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .fullscreen-btn {
+                position: static; /* Revert to static for mobile column layout */
+                margin-top: 10px; /* Add space in mobile view */
+                align-self: center; /* Center button in mobile */
+            }
+        }
+
+        .game-indicator {
+            background: var(--secondary-color); /* Use softer red */
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .game-complete {
+            background: var(--container-bg);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin: 25px 0;
+            text-align: center;
+            display: none;
+            border: 1px solid var(--border-color);
+        }
+
+        .game-complete h2 {
+            margin-bottom: 10px;
+            color: var(--primary-color); /* Softer Gold */
+        }
+
+        .game-complete button {
+            background: var(--secondary-color); /* Softer red */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .game-complete button:hover {
+            background: #E53935; /* Corresponding lighter softer red */
+            transform: scale(1.05);
+        }
+
+        /* Dimming completed sections */
+        .input-container.game-completed,
+        .statistic-container.game-completed,
+        .log-game-btn.game-completed {
+            opacity: 0.4; /* Dim more */
+            pointer-events: none;
+        }
+
+        .how-to {
+            background: var(--card-bg); /* Use card background */
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+            text-align: left; /* Align text to the left */
+            color: var(--text-color);
+        }
+
+        .how-to h3 {
+            color: var(--primary-color); /* Gold color for heading */
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .how-to ul {
+            margin: 0;
+            padding-left: 20px; /* Indent list */
+            list-style: disc; /* Use standard bullets */
+        }
+
+        .how-to li {
+            margin-bottom: 8px; /* Space between items */
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="header">
+            <div class="header-left">
+                <img src="crows-logo.png" alt="Crows Logo">
+                <h1>CrowMetrica Counter</h1>
+                <img src="afc-logo.png" alt="AFC Logo">
+            </div>
+            <button class="fullscreen-btn" onclick="toggleFullscreen()">
+                <span class="fullscreen-text">Full Screen</span>
+            </button>
+        </div>
+
+        <div class="game-indicator">
+            Result <span id="current-game">1</span> of 3
+        </div>
+
+        <!-- Added How To Section -->
+        <div class="how-to">
+            <h3>What do I do?</h3>
+            <ul>
+                <li>Enter the player's name you are tracking.</li>
+                <li>Add the statistics you want to count (e.g., Kicks, Tackles) using the 'Add Statistic' button. Choose a unique color for each.</li>
+                <li>During each 5-minute clip, use the '+1' and '-1' buttons under each statistic to keep count.</li>
+                <li>After the first 5-minute clip is finished, click the 'Log 5 Min Game Result' button.</li>
+                <li>Repeat the counting and logging process for the second and third 5-minute clips.</li>
+                <li>Once all 3 results are logged, review the player's performance in the results table below.</li>
+            </ul>
+        </div>
+        <!-- End How To Section -->
+
+        <div class="input-container">
+            <div class="input-grid">
+                <!-- Added Player Name Input -->
+                <div class="input-group" id="player-name-input">
+                    <label for="player-name">Player Name</label>
+                    <input type="text" id="player-name" placeholder="Enter player name">
+                </div>
+                <!-- Renamed Counter inputs to Statistic inputs -->
+                <div class="input-group">
+                    <label for="statistic-name">Statistic Label</label>
+                    <input type="text" id="statistic-name" placeholder="e.g., Kicks, Tackles">
+                </div>
+                <div class="input-group">
+                    <label for="statistic-color">Statistic Colour</label>
+                    <select id="statistic-color">
+                        <option value="#4169E1">Royal Blue</option>
+                        <option value="#FF0000">Red</option>
+                        <option value="#FFD700">Yellow</option>
+                    </select>
+                </div>
+            </div>
+            <button class="add-statistic-btn" onclick="addStatistic()">Add Statistic</button> <!-- Renamed -->
+        </div>
+
+        <div id="statistic-container" class="statistic-container"></div> <!-- Renamed -->
+
+        <button class="log-game-btn" onclick="logGameResult()">Log 5 Min Game Result</button>
+
+        <div class="game-complete" id="game-complete">
+            <h2>All Results Completed!</h2>
+            <p>You have completed all 3 results. Check your results in the table below.</p>
+            <button onclick="resetAllGames()">Start New Session</button>
+        </div>
+
+        <table id="game-results-table">
+            <thead>
+                <tr>
+                    <th>Statistics</th>
+                    <th>Result 1</th>
+                    <th>Result 2</th>
+                    <th>Result 3</th>
+                    <th>Average 5 min Clip results</th>
+                </tr>
+            </thead>
+            <tbody id="game-results-body"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const statisticContainer = document.getElementById('statistic-container'); // Renamed
+        const gameResults = {};
+        let gameCount = 1;
+        let playerName = ''; // Variable to store player name
+
+        // Function to update player name (optional, could be displayed somewhere)
+        function updatePlayerName() {
+            playerName = document.getElementById('player-name').value.trim();
+            // Example: Display player name in the header or elsewhere if needed
+            // document.getElementById('player-name-display').textContent = playerName ? `Tracking: ${playerName}` : '';
+            console.log("Player Name:", playerName); // Log to console for now
+        }
+
+        // Add event listener to update player name when input changes
+        document.getElementById('player-name').addEventListener('input', updatePlayerName);
+
+        function updateGameIndicator() {
+            document.getElementById('current-game').textContent = gameCount;
+        }
+
+        function addStatistic() { // Renamed from addCounter
+            const statisticName = document.getElementById('statistic-name').value.trim(); // Renamed
+            const statisticColor = document.getElementById('statistic-color').value; // Renamed
+
+            if (statisticName === "") return;
+
+            // Prevent adding duplicate statistic names
+            if (gameResults.hasOwnProperty(statisticName)) {
+                alert(`Statistic \"${statisticName}\" already exists. Please choose a unique name.`);
+                document.getElementById('statistic-name').focus(); // Focus the input for correction
+                return;
+            }
+
+            const statisticDiv = document.createElement('div'); // Renamed
+            statisticDiv.className = 'statistic'; // Renamed
+            statisticDiv.style.borderLeftColor = statisticColor;
+            statisticDiv.style.borderLeftWidth = '6px';
+            statisticDiv.style.borderLeftStyle = 'solid';
+            statisticDiv.dataset.baseName = statisticName; // Store base name
+
+            // Construct display label with correct possessive
+            let displayLabel = statisticName;
+            if (playerName) {
+                const possessive = playerName.toLowerCase().endsWith('s') ? "'" : "'s";
+                displayLabel = `${playerName}${possessive} ${statisticName}`;
+            }
+
+            // Only show remove button if first game hasn't been logged
+            const removeButton = gameCount === 1 ?
+                `<button class="remove-statistic" onclick="removeStatistic(this.parentElement, '${statisticName}')" title="Remove Statistic">×</button>` : ''; // Use base name for removal
+
+            statisticDiv.innerHTML = `
+                ${removeButton}
+                <h2 onclick="editLabel(this)" style="color: ${statisticColor}">${displayLabel}</h2> <!-- Show combined label -->
+                <div id="${statisticName}-display" class="statistic-display" style="color: ${statisticColor}">0</div> <!-- ID uses base name -->
+                <div class="statistic-buttons"> 
+                    <button class="statistic-btn" style="background-color: ${statisticColor}" onclick="updateStatistic('${statisticName}', 1)">+1</button> <!-- Use base name, removed sound -->
+                    <button class="statistic-btn" style="background-color: ${statisticColor}" onclick="updateStatistic('${statisticName}', -1)">-1</button> <!-- Use base name, removed sound -->
+                    <button class="statistic-btn" style="background-color: ${statisticColor}" onclick="resetStatistic('${statisticName}')">Reset</button> <!-- Use base name -->
+                </div>
+            `;
+            statisticContainer.appendChild(statisticDiv); 
+            document.getElementById('statistic-name').value = "";
+
+            gameResults[statisticName] = { game1: 0, game2: 0, game3: 0, total: 0, average: 0 }; // Use base name as key
+            // No total count update needed anymore
+        }
+
+        function removeStatistic(statisticElement, statisticName) { // Renamed from removeCounter
+            if (gameCount === 1) {
+                statisticElement.classList.add('pop'); // Uses existing class name
+                setTimeout(() => {
+                    statisticElement.remove();
+                    delete gameResults[statisticName];
+                    // No total count update needed anymore
+                    updateGameResultsTable();
+                }, 200);
+            }
+        }
+
+        function updateStatistic(statisticName, increment) { // Renamed from updateCounter, removed sound parameter
+            const display = document.getElementById(`${statisticName}-display`);
+            // Ensure display element was found
+            if (!display) {
+                console.error(`Could not find display element for statistic: ${statisticName}`);
+                return;
+            }
+            let count = parseInt(display.innerText) + increment;
+            count = count < 0 ? 0 : count;
+            display.innerText = count;
+
+            // Enhanced animation with color
+            display.classList.remove('pop', 'increment', 'decrement');
+            void display.offsetWidth; // Force reflow
+            display.classList.add('pop');
+            display.classList.add(increment > 0 ? 'increment' : 'decrement');
+
+            // Remove color animation after transition
+            setTimeout(() => {
+                display.classList.remove('increment', 'decrement');
+            }, 300);
+
+            // Removed playClickSound call
+            // playClickSound(sound);
+        }
+
+        function resetStatistic(statisticName) { // Renamed from resetCounter
+            const display = document.getElementById(`${statisticName}-display`);
+            display.innerText = "0";
+            display.classList.add('pop');
+            setTimeout(() => display.classList.remove('pop'), 200);
+            // No total count update needed anymore
+        }
+
+        function logGameResult() {
+            // Remove all remove buttons after first game is logged
+            if (gameCount === 1) {
+                document.querySelectorAll('.remove-statistic').forEach(btn => btn.remove()); // Renamed class
+            }
+
+            const statistics = document.querySelectorAll('.statistic-display'); // Renamed class
+            statistics.forEach(statistic => { // Renamed variable
+                const statisticName = statistic.id.replace('-display', ''); // Renamed variable
+                const count = parseInt(statistic.innerText);
+
+                gameResults[statisticName][`game${gameCount}`] = count;
+                gameResults[statisticName].average = gameResults[statisticName].game3; // This still calculates based on Game 3 (Result 3)
+            });
+
+            updateGameResultsTable();
+
+            // Clear and animate statistics displays
+            statistics.forEach(statistic => { // Renamed variable
+                statistic.innerText = "0";
+                statistic.classList.add('pop');
+                setTimeout(() => statistic.classList.remove('pop'), 200);
+            });
+           // No total count update needed anymore
+
+            gameCount++;
+            if (gameCount > 3) {
+                completeAllGames();
+            } else {
+                updateGameIndicator();
+            }
+        }
+
+        function completeAllGames() {
+            document.querySelector('.input-container').classList.add('game-completed');
+            document.querySelector('.statistic-container').classList.add('game-completed'); // Renamed class
+            document.querySelector('.log-game-btn').classList.add('game-completed');
+            document.getElementById('game-complete').style.display = 'block';
+        }
+
+        function resetAllGames() {
+            gameCount = 1;
+            updateGameIndicator();
+            playerName = ''; // Reset player name
+            document.getElementById('player-name').value = ''; // Clear player name input
+
+            // Clear all results
+            for (const metric in gameResults) {
+                gameResults[metric] = { game1: 0, game2: 0, game3: 0, total: 0, average: 0 };
+            }
+
+            // Reset UI
+            document.querySelector('.input-container').classList.remove('game-completed');
+            document.querySelector('.statistic-container').classList.remove('game-completed'); // Renamed class
+            document.querySelector('.log-game-btn').classList.remove('game-completed');
+            document.getElementById('game-complete').style.display = 'none';
+
+            // Clear statistic displays
+            const statistics = document.querySelectorAll('.statistic-display'); // Renamed class
+            statistics.forEach(statistic => { // Renamed variable
+                statistic.innerText = "0";
+            });
+
+            // Re-enable adding remove buttons for the first game
+            // (Need to re-query the DOM for any existing statistics if the user didn't remove them all before starting new session)
+             document.querySelectorAll('.statistic').forEach(statDiv => {
+                 const statName = statDiv.querySelector('h2').innerText;
+                 if (!statDiv.querySelector('.remove-statistic')) { // Check if button already exists
+                    const removeButtonHTML = `<button class="remove-statistic" onclick="removeStatistic(this.parentElement, '${statName}')" title="Remove Statistic">×</button>`;
+                    statDiv.insertAdjacentHTML('afterbegin', removeButtonHTML);
+                 }
+             });
+
+            // No total count update needed anymore
+            updateGameResultsTable();
+        }
+
+        function updateGameResultsTable() {
+            const gameResultsBody = document.getElementById('game-results-body');
+            gameResultsBody.innerHTML = '';
+
+            // Update Player Name Row (Example - adjust as needed)
+            if (playerName) {
+                 const playerRow = document.createElement('tr');
+                 playerRow.innerHTML = `<td colspan="5" style="text-align:left; font-weight:bold; background-color: #eef;">Player: ${playerName}</td>`; // Changed colspan to 5
+                 gameResultsBody.appendChild(playerRow);
+            }
+
+            for (const metric in gameResults) { // metric is the base name (e.g., Kicks)
+                const result = gameResults[metric];
+                const newRow = document.createElement('tr');
+                // Construct display label for the table with correct possessive
+                let tableDisplayLabel = metric;
+                 if (playerName) {
+                    const possessive = playerName.toLowerCase().endsWith('s') ? "'" : "'s";
+                    tableDisplayLabel = `${playerName}${possessive} ${metric}`;
+                }
+                newRow.innerHTML = `
+                    <td>${tableDisplayLabel}</td> <!-- Show combined label -->
+                    <td class="${gameCount >= 1 ? 'highlight' : ''}">${result.game1}</td>
+                    <td class="${gameCount >= 2 ? 'highlight' : ''}">${result.game2}</td>
+                    <td class="${gameCount >= 3 ? 'highlight' : ''}">${result.game3}</td>
+                    <td class="${gameCount >= 3 ? 'highlight-average' : ''}">${result.average}</td>
+                `;
+                gameResultsBody.appendChild(newRow);
+            }
+        }
+
+        function editLabel(element) {
+            // Assuming the element passed is the H2 tag
+            const statisticDiv = element.closest('.statistic'); 
+            const oldBaseName = statisticDiv.dataset.baseName; // Get base name from data attribute
+            const displayElement = statisticDiv.querySelector('.statistic-display'); 
+            const statisticColor = element.style.color; // Get color for buttons
+
+            const newBaseNameInput = prompt("Edit Statistic Label:", oldBaseName);
+            
+            if (newBaseNameInput && newBaseNameInput.trim() !== "" && newBaseNameInput.trim() !== oldBaseName) {
+                 const newBaseName = newBaseNameInput.trim();
+
+                 // Check if new base name already exists
+                 if (gameResults.hasOwnProperty(newBaseName)) {
+                     alert(`Statistic label "${newBaseName}" already exists. Please choose a unique label.`);
+                     return;
+                 }
+
+                 // Update the gameResults object key
+                 if (gameResults.hasOwnProperty(oldBaseName)) {
+                    gameResults[newBaseName] = gameResults[oldBaseName];
+                    delete gameResults[oldBaseName];
+                 } else {
+                     gameResults[newBaseName] = { game1: 0, game2: 0, game3: 0, total: 0, average: 0 };
+                 }
+
+                 // Update the data attribute
+                 statisticDiv.dataset.baseName = newBaseName;
+
+                 // Update the ID of the display element
+                 displayElement.id = `${newBaseName}-display`;
+
+                 // Update the onclick handlers for buttons within this statistic
+                 const buttons = statisticDiv.querySelectorAll('.statistic-btn');
+                 buttons[0].setAttribute('onclick', `updateStatistic('${newBaseName}', 1)`); // Removed sound
+                 buttons[1].setAttribute('onclick', `updateStatistic('${newBaseName}', -1)`); // Removed sound
+                 buttons[2].setAttribute('onclick', `resetStatistic('${newBaseName}')`);
+
+                 // Update the remove button handler if it exists
+                 const removeButton = statisticDiv.querySelector('.remove-statistic');
+                 if (removeButton) {
+                    removeButton.setAttribute('onclick', `removeStatistic(this.parentElement, '${newBaseName}')`);
+                 }
+
+                 // Reconstruct display label and update the H2 text with correct possessive
+                let displayLabel = newBaseName;
+                if (playerName) {
+                    const possessive = playerName.toLowerCase().endsWith('s') ? "'" : "'s";
+                    displayLabel = `${playerName}${possessive} ${newBaseName}`;
+                }
+                 element.innerText = displayLabel;
+
+                 // Update the results table immediately
+                 updateGameResultsTable();
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            const btn = document.querySelector('.fullscreen-btn');
+            btn.textContent = document.fullscreenElement ? 'Exit Full Screen' : 'Full Screen';
+        });
+
+        document.addEventListener('keydown', (e) => {
+            // Trigger addStatistic if Enter is pressed in the statistic name input
+            if (e.key === 'Enter' && document.getElementById('statistic-name').value.trim() !== '' && document.activeElement === document.getElementById('statistic-name')) {
+                addStatistic();
+            }
+            // Optional: Add similar listener for Player Name if desired
+             if (e.key === 'Enter' && document.activeElement === document.getElementById('player-name')) {
+                 // Maybe move focus to the statistic name input or trigger something else
+                 document.getElementById('statistic-name').focus();
+             }
+        });
+    </script>
+</body>
+</html>
