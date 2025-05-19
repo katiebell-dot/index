@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFL Match Data Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #002b5c;
+            --secondary-color: #e31837;
+            --accent-color: #ffd700;
+            --background-color: #002b5c;
+            --text-color: #ffffff;
+            --card-bg: #e31837;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: url('oval.png') center center/cover fixed;
+            min-height: 100vh;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: var(--accent-color);
+            position: relative;
+            margin: 0;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 43, 92, 0.3);
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .header .title-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header .logos img {
+            width: 150px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .header h1 {
+            color: var(--accent-color);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .header p {
+            color: var(--text-color);
+            font-size: 1.2em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .foundation-logo {
+            width: 100px !important;  /* Override the default logo size */
+            height: auto;
+        }
+
+        .crows-logo {
+            width: 150px;
+            height: auto;
+        }
+
+        .match-conditions {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+
+        .condition-card {
+            background: rgba(227, 24, 55, 0.9);
+            backdrop-filter: blur(5px);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border: 3px solid var(--accent-color);
+            text-align: center;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: translateY(0);
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+
+        .condition-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            border-color: #fff;
+            background: rgba(227, 24, 55, 1);
+        }
+
+        .condition-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            transform: rotate(45deg);
+            transition: 0.6s;
+            opacity: 0;
+        }
+
+        .condition-card:hover::before {
+            opacity: 1;
+        }
+
+        .condition-label {
+            background: rgba(0, 43, 92, 0.9);
+            backdrop-filter: blur(5px);
+            color: var(--accent-color);
+            padding: 8px;
+            border-radius: var(--border-radius);
+            border: 2px solid var(--accent-color);
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .condition-value {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: var(--accent-color);
+            font-weight: 500;
+            text-decoration: none !important;
+            border: none;
+            position: relative;
+            transform: none;
+            -webkit-text-decoration: none !important;
+            -moz-text-decoration: none !important;
+        }
+
+        .condition-value::before,
+        .condition-value::after {
+            content: none;
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .spin-btn {
+            background: rgba(227, 24, 55, 0.9);
+            backdrop-filter: blur(5px);
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            padding: 15px 45px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1.3em;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .spin-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            background: var(--accent-color);
+            color: var(--primary-color);
+            letter-spacing: 2px;
+        }
+
+        .spin-btn:active {
+            transform: translateY(0) scale(0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .spin-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transform: rotate(45deg);
+            transition: 0.6s;
+            opacity: 0;
+        }
+
+        .spin-btn:hover::after {
+            opacity: 1;
+        }
+
+        @keyframes flash {
+            0% { 
+                background-color: var(--accent-color); 
+                color: var(--primary-color);
+                transform: scale(1.1);
+            }
+            100% { 
+                background-color: var(--card-bg); 
+                color: var(--accent-color);
+                transform: scale(1);
+            }
+        }
+
+        .flashing {
+            animation: flash 0.5s infinite alternate;
+            text-decoration: none !important;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        @keyframes success-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .success {
+            animation: success-pulse 0.5s ease-in-out;
+        }
+
+        @media (max-width: 1024px) {
+            .match-conditions {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .container {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .match-conditions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .header {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .match-conditions {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 1.5em;
+            }
+        }
+
+        .fullscreen-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 43, 92, 0.9);
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            text-transform: uppercase;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .fullscreen-btn:hover {
+            background: var(--accent-color);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .fullscreen-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Update fullscreen mode background */
+        :fullscreen {
+            background: url('./oval.jpg') center center/cover fixed;
+        }
+
+        :-webkit-full-screen {
+            background: url('./oval.jpg') center center/cover fixed;
+        }
+
+        :-moz-full-screen {
+            background: url('./oval.jpg') center center/cover fixed;
+        }
+
+        :-ms-fullscreen {
+            background: url('./oval.jpg') center center/cover fixed;
+        }
+
+        .crows-logo {
+            width: 150px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            transition: transform 0.3s ease;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .crows-logo.spinning {
+            animation: spinLogo 2s infinite linear;
+        }
+
+        @keyframes spinLogo {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-container {
+            width: 80%;
+            max-width: 600px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin: 20px auto;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+            border-radius: 10px;
+            transition: width 0.1s linear;
+        }
+
+        .wait-message {
+            color: var(--accent-color);
+            font-size: 1.5em;
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .condition-card.spinning {
+            animation: none;
+        }
+
+        .condition-card.spinning-fast {
+            animation: cardSpinFast 0.2s infinite linear;
+        }
+
+        .condition-card.spinning-medium {
+            animation: cardSpinMedium 0.4s infinite linear;
+        }
+
+        .condition-card.spinning-slow {
+            animation: cardSpinSlow 0.8s infinite linear;
+        }
+
+        @keyframes cardSpinFast {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        @keyframes cardSpinMedium {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        @keyframes cardSpinSlow {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        .condition-card.reveal {
+            animation: revealCard 0.5s forwards;
+        }
+
+        @keyframes revealCard {
+            0% { transform: rotateX(180deg); opacity: 0; }
+            100% { transform: rotateX(0deg); opacity: 1; }
+        }
+
+        .spin-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 215, 0, 0.3),
+                transparent
+            );
+            transform: rotate(45deg);
+            animation: buttonGlow 2s infinite;
+        }
+
+        @keyframes buttonGlow {
+            0% { transform: rotate(45deg) translateX(-100%); }
+            100% { transform: rotate(45deg) translateX(100%); }
+        }
+
+        /* Update logo spinning to match card speed */
+        .crows-logo.spinning-fast {
+            animation: spinLogoVerticalFast 0.5s infinite linear;
+        }
+
+        .crows-logo.spinning-medium {
+            animation: spinLogoVerticalMedium 1s infinite linear;
+        }
+
+        .crows-logo.spinning-slow {
+            animation: spinLogoVerticalSlow 2s infinite linear;
+        }
+
+        @keyframes spinLogoVerticalFast {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        @keyframes spinLogoVerticalMedium {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        @keyframes spinLogoVerticalSlow {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        /* Add a container for the logo to maintain its 3D space */
+        .logo-container {
+            perspective: 1000px;
+            transform-style: preserve-3d;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <button class="fullscreen-btn" onclick="toggleFullscreen()">Fullscreen</button>
+    <div class="container">
+        <div class="header">
+            <img src="foundation.png" alt="Foundation Logo" class="foundation-logo">
+            <div class="title-section">
+                <h1>Crows Game Stats Spinner</h1>
+                <p>Work out ground conditions for Activity 12</p>
+            </div>
+            <img src="crow_logo.png" alt="Adelaide Crows Logo" class="crows-logo">
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+        
+        <div class="wait-message">Spinning in progress... Please wait!</div>
+
+        <div class="match-conditions">
+            <div class="condition-card">
+                <div class="condition-label">Venue</div>
+                <div class="condition-value" id="venue">---</div>
+            </div>
+            <div class="condition-card">
+                <div class="condition-label">Result</div>
+                <div class="condition-value" id="result">---</div>
+            </div>
+            <div class="condition-card">
+                <div class="condition-label">Ground Size</div>
+                <div class="condition-value" id="groundSize">---</div>
+            </div>
+            <div class="condition-card">
+                <div class="condition-label">Crowd Size</div>
+                <div class="condition-value" id="crowdSize">---</div>
+            </div>
+            <div class="condition-card">
+                <div class="condition-label">Rain</div>
+                <div class="condition-value" id="rain">---</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="spin-btn" onclick="generateConditions()">Generate</button>
+        </div>
+    </div>
+
+    <script>
+        const allowedCombinations = [
+            ["Home", "Win", "Medium", "Large", "Yes"],
+            ["Home", "Win", "Medium", "Medium", "Yes"],
+            ["Home", "Win", "Medium", "Small", "No"],
+            ["Home", "Win", "Medium", "Small", "Yes"],
+            ["Home", "Loss", "Medium", "Large", "Yes"],
+            ["Home", "Loss", "Medium", "Large", "No"],
+            ["Home", "Loss", "Medium", "Medium", "No"],
+            ["Home", "Loss", "Medium", "Small", "Yes"],
+            ["Home", "Draw", "Medium", "Medium", "Yes"]
+        ];
+
+        // Add audio element
+        const spinnerAudio = new Audio('sax.mp3');
+
+        function generateConditions() {
+            const cards = document.querySelectorAll('.condition-card');
+            const values = document.querySelectorAll('.condition-value');
+            const button = document.querySelector('.spin-btn');
+            const logo = document.querySelector('.crows-logo');
+            const progressContainer = document.querySelector('.progress-container');
+            const progressBar = document.querySelector('.progress-bar');
+            const waitMessage = document.querySelector('.wait-message');
+            
+            // Disable button during animation
+            button.disabled = true;
+            button.style.opacity = '0.7';
+            
+            // Play audio
+            spinnerAudio.currentTime = 0;
+            spinnerAudio.play();
+            
+            // Show progress bar and wait message
+            progressContainer.style.display = 'block';
+            waitMessage.style.display = 'block';
+            
+            // Start spinning animations
+            logo.classList.add('spinning-fast');
+            cards.forEach(card => {
+                card.classList.add('spinning-fast');
+                card.querySelector('.condition-value').classList.add('flashing');
+            });
+
+            // Generate random values with varying speed
+            let counter = 0;
+            const maxIterations = 70; // 7 seconds total
+            const fastPhase = Math.floor(maxIterations * 0.4); // First 40% at fast speed
+            const mediumPhase = Math.floor(maxIterations * 0.7); // Next 30% at medium speed
+            // Remaining 30% at slow speed
+
+            const interval = setInterval(() => {
+                // Update progress bar
+                const progress = (counter / maxIterations) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                // Update spinning speed based on progress
+                if (counter === fastPhase) {
+                    // Switch to medium speed
+                    logo.classList.remove('spinning-fast');
+                    logo.classList.add('spinning-medium');
+                    cards.forEach(card => {
+                        card.classList.remove('spinning-fast');
+                        card.classList.add('spinning-medium');
+                    });
+                } else if (counter === mediumPhase) {
+                    // Switch to slow speed
+                    logo.classList.remove('spinning-medium');
+                    logo.classList.add('spinning-slow');
+                    cards.forEach(card => {
+                        card.classList.remove('spinning-medium');
+                        card.classList.add('spinning-slow');
+                    });
+                }
+                
+                if (counter >= maxIterations) {
+                    clearInterval(interval);
+                    
+                    // Stop all animations
+                    logo.classList.remove('spinning-slow');
+                    progressContainer.style.display = 'none';
+                    waitMessage.style.display = 'none';
+                    
+                    // Select final combination
+                    const finalCombination = allowedCombinations[Math.floor(Math.random() * allowedCombinations.length)];
+                    
+                    // Set final values with reveal animation
+                    cards.forEach((card, index) => {
+                        card.classList.remove('spinning-slow');
+                        card.classList.add('reveal');
+                        
+                        const value = card.querySelector('.condition-value');
+                        value.classList.remove('flashing');
+                        value.textContent = finalCombination[index];
+                        value.classList.add('success');
+                        
+                        setTimeout(() => {
+                            card.classList.remove('reveal');
+                            value.classList.remove('success');
+                        }, 1000);
+                    });
+
+                    // Re-enable button with animation
+                    button.disabled = false;
+                    button.style.opacity = '1';
+                } else {
+                    // Show random combinations during animation
+                    const randomComb = allowedCombinations[Math.floor(Math.random() * allowedCombinations.length)];
+                    values.forEach((value, index) => {
+                        value.textContent = randomComb[index];
+                    });
+                }
+                counter++;
+            }, 100);
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement && 
+                !document.mozFullScreenElement && 
+                !document.webkitFullscreenElement && 
+                !document.msFullscreenElement) {
+                // Enter fullscreen
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    document.documentElement.msRequestFullscreen();
+                } else if (document.documentElement.mozRequestFullScreen) {
+                    document.documentElement.mozRequestFullScreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                }
+                document.querySelector('.fullscreen-btn').textContent = 'Exit Full';
+            } else {
+                // Exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+                document.querySelector('.fullscreen-btn').textContent = 'Fullscreen';
+            }
+        }
+
+        // Listen for fullscreen change
+        document.addEventListener('fullscreenchange', updateFullscreenButton);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+        document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+        document.addEventListener('MSFullscreenChange', updateFullscreenButton);
+
+        function updateFullscreenButton() {
+            const button = document.querySelector('.fullscreen-btn');
+            if (document.fullscreenElement || 
+                document.webkitFullscreenElement || 
+                document.mozFullScreenElement || 
+                document.msFullscreenElement) {
+                button.textContent = 'Exit Full';
+            } else {
+                button.textContent = 'Fullscreen';
+            }
+        }
+    </script>
+</body>
+</html>
