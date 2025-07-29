@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glitterbug Handwashing Activity</title>
+  <!-- Add Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', Arial, sans-serif;
+      background: linear-gradient(135deg, #002B5C 0%, #003366 100%);
+      color: white;
+      text-align: center;
+      min-height: 100vh;
+    }
+    h1 {
+      background-color: #FDB927;
+      color: #002B5C;
+      padding: 1.2rem 1rem 1rem 1rem;
+      margin: 0;
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .main-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 3rem;
+      flex-wrap: wrap;
+      margin: 30px auto 30px;
+      max-width: 1100px;
+    }
+    .grid-container, .chart-container {
+      background: rgba(255,255,255,0.07);
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 2rem 2.5rem 1.5rem 2.5rem;
+      margin-bottom: 1.5rem;
+      min-width: 340px;
+    }
+    .grid-title, .chart-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+      letter-spacing: 0.5px;
+      color: #FDB927;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    }
+    .grid-wrapper {
+      background-color: white;
+      padding: 0.3cm;
+      display: inline-block;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+      margin-bottom: 10px;
+    }
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1cm);
+      grid-template-rows: repeat(10, 1cm);
+      width: 10cm;
+      height: 10cm;
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .cell {
+      border: 1px solid #002B5C;
+      width: 1cm;
+      height: 1cm;
+      box-sizing: border-box;
+      background-color: transparent;
+      z-index: 2;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.18s cubic-bezier(.4,2,.6,1), opacity 0.18s;
+      cursor: pointer;
+      opacity: 1;
+    }
+    .cell.pop {
+      animation: popCell 0.25s cubic-bezier(.4,2,.6,1);
+    }
+    @keyframes popCell {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.25); }
+      100% { transform: scale(1); }
+    }
+    .cell.fade-out {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .cell.fade-in {
+      opacity: 1;
+      transition: opacity 0.3s;
+    }
+    .cell:hover {
+      box-shadow: 0 0 0 2px #FDB927;
+      filter: brightness(1.1);
+      transform: scale(1.08);
+    }
+    .cell.active {
+      background-color: rgba(139, 0, 0, 0.7);
+      box-shadow: 0 0 8px 2px #FDB92755;
+      animation: popCell 0.25s cubic-bezier(.4,2,.6,1);
+    }
+    #grid::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 10cm;
+      height: 10cm;
+      background-image: url('hand-2.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.95;
+    }
+    #count-display {
+      font-size: 1rem;
+      margin-top: 12px;
+      margin-bottom: 8px;
+      color: #FDB927;
+      font-weight: 600;
+    }
+    .button-row {
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      margin: 1.5rem 0 0.5rem 0;
+      flex-wrap: wrap;
+    }
+    button {
+      background: linear-gradient(90deg, #FDB927 60%, #FFD966 100%);
+      border: none;
+      padding: 12px 28px;
+      margin: 0;
+      color: #002B5C;
+      font-weight: 700;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: background 0.2s, transform 0.1s;
+      outline: none;
+    }
+    button:hover, button:focus {
+      background: linear-gradient(90deg, #FFD966 60%, #FDB927 100%);
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 4px 16px rgba(253,185,39,0.18);
+    }
+    .fullscreen-btn {
+      background: linear-gradient(90deg, #002B5C 60%, #003366 100%);
+      color: #FDB927;
+      border: 2px solid #FDB927;
+      margin-left: 1rem;
+      font-size: 1.2rem;
+      padding: 10px 18px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    }
+    .fullscreen-btn:hover, .fullscreen-btn:focus {
+      background: #FDB927;
+      color: #002B5C;
+      border-color: #002B5C;
+    }
+    .chart-container {
+      align-items: center;
+      min-width: 340px;
+    }
+    canvas {
+      width: 10cm !important;
+      height: 10cm !important;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+      margin-bottom: 10px;
+    }
+    #reflection {
+      display: none;
+      margin-top: 2.5rem;
+      background-color: #FDB927;
+      color: #002B5C;
+      padding: 2rem 1.5rem 2.5rem 1.5rem;
+      border-radius: 18px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+      animation: fadeIn 0.7s;
+    }
+    #reflection h2 {
+      margin-top: 0;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+    #reflection p {
+      font-size: 1.2rem;
+      margin-bottom: 1.2rem;
+    }
+    #reflection textarea {
+      width: 90%;
+      min-height: 80px;
+      border-radius: 8px;
+      border: 1.5px solid #002B5C;
+      padding: 0.7rem;
+      font-size: 1rem;
+      font-family: 'Inter', Arial, sans-serif;
+      margin-bottom: 1rem;
+      resize: vertical;
+    }
+    #reflection label {
+      font-weight: 600;
+      color: #002B5C;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    footer {
+      margin-top: 2.5rem;
+      padding-bottom: 2.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .logo-bar {
+      background: rgba(255,255,255,0.85);
+      border-radius: 22px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 18px 36px;
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      justify-content: center;
+      max-width: 700px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+    }
+    .logo-bar img {
+      height: 54px;
+      margin: 0 8px;
+      border-radius: 10px;
+      background: white;
+      padding: 6px 10px;
+      filter: grayscale(100%) drop-shadow(0 2px 8px rgba(0,0,0,0.10));
+      transition: filter 0.3s, transform 0.2s;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    }
+    .logo-bar img:hover, .logo-bar img:focus {
+      filter: grayscale(0%) drop-shadow(0 4px 16px rgba(253,185,39,0.18));
+      transform: scale(1.08);
+      z-index: 1;
+    }
+    @media (max-width: 700px) {
+      .logo-bar {
+        padding: 12px 4vw;
+        gap: 16px;
+      }
+      .logo-bar img {
+        height: 38px;
+        padding: 4px 4px;
+      }
+    }
+    .button-row button {
+      transition: transform 0.12s cubic-bezier(.4,2,.6,1), box-shadow 0.18s;
+    }
+    .button-row button:active {
+      transform: scale(0.96);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+    }
+    .stage-fade {
+      animation: fadeStage 0.5s;
+    }
+    @keyframes fadeStage {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 900px) {
+      .main-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+      }
+      .grid-container, .chart-container {
+        min-width: unset;
+        width: 95vw;
+        padding: 1.2rem 0.5rem 1rem 0.5rem;
+      }
+      canvas {
+        width: 90vw !important;
+        height: 90vw !important;
+        max-width: 350px !important;
+        max-height: 350px !important;
+      }
+      #grid {
+        width: 90vw;
+        height: 90vw;
+        max-width: 350px;
+        max-height: 350px;
+      }
+    }
+    .glitter-title {
+      display: inline-block;
+    }
+    .glitter-gradient {
+      background: linear-gradient(90deg, #FDB927 10%, #fff700 30%, #FDB927 60%, #fff700 90%);
+      background-size: 200% auto;
+      color: #FDB927;
+      font-weight: 900;
+      padding: 0 0.3em;
+      border-radius: 10px;
+      text-shadow: 0 2px 8px #fff70099, 0 1px 0 #fff, 0 0px 8px #FDB92755;
+      animation: shimmer 2.5s linear infinite;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    @keyframes shimmer {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    .sparkle-twinkle {
+      display: inline-block;
+      animation: twinkle 1.8s infinite;
+      margin-right: 0.12em;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px #fff700cc); }
+      20% { opacity: 0.7; filter: drop-shadow(0 0 12px #fff700); }
+      40% { opacity: 1; filter: drop-shadow(0 0 8px #FDB927); }
+      60% { opacity: 0.8; filter: drop-shadow(0 0 16px #fff700); }
+      80% { opacity: 1; filter: drop-shadow(0 0 6px #fff700cc); }
+    }
+    .instructions-box {
+      background: linear-gradient(90deg, #FDB927 60%, #FFD966 100%);
+      color: #002B5C;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      max-width: 600px;
+      margin: 24px auto 18px auto;
+      padding: 1.1em 1.5em 1.1em 1.5em;
+      font-size: 1.15rem;
+      font-weight: 500;
+      text-align: left;
+    }
+    .instructions-box strong {
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 0.5em;
+    }
+    .instructions-box ol {
+      margin: 0 0 0 1.2em;
+      padding: 0;
+    }
+    .instructions-box li {
+      margin-bottom: 0.4em;
+      line-height: 1.5;
+    }
+    .help-btn {
+      background: linear-gradient(135deg, #FDB927 60%, #FFD966 100%);
+      color: #002B5C;
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: bold;
+      box-shadow: 0 0 0 3px transparent;
+      box-sizing: border-box;
+      line-height: 1;
+      vertical-align: middle;
+      cursor: pointer;
+      z-index: 1001;
+      transition: background 0.2s, box-shadow 0.2s;
+      padding: 0;
+      margin-left: 18px;
+    }
+    .help-btn:hover, .help-btn:focus {
+      background: linear-gradient(135deg, #FFD966 60%, #FDB927 100%);
+      box-shadow: 0 0 0 3px #002B5C;
+      outline: none;
+    }
+    .instructions-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      animation: fadeIn 0.3s;
+    }
+    .instructions-content {
+      background: linear-gradient(90deg, #FDB927 60%, #FFD966 100%);
+      color: #002B5C;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+      max-width: 420px;
+      width: 90vw;
+      padding: 2em 1.5em 1.5em 1.5em;
+      font-size: 1.15rem;
+      font-weight: 500;
+      text-align: left;
+      position: relative;
+    }
+    .instructions-content strong {
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 0.5em;
+    }
+    .instructions-content ol {
+      margin: 0 0 0 1.2em;
+      padding: 0;
+    }
+    .instructions-content li {
+      margin-bottom: 0.4em;
+      line-height: 1.5;
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      background: none;
+      border: none;
+      color: #002B5C;
+      font-size: 1.6rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .close-btn:hover, .close-btn:focus {
+      color: #8B0000;
+      outline: none;
+    }
+    .title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: visible;
+      padding-right: 36px;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="title-bar">
+    <span class="glitter-title">
+      <span class="glitter-gradient">
+        <span class="sparkle-twinkle"></span> Glitter Bug
+      </span>
+      Handwashing Activity
+    </span>
+    <button id="help-btn" class="help-btn" aria-label="Show instructions">❓</button>
+  </h1>
+  <div id="instructions-modal" class="instructions-modal" tabindex="-1" aria-modal="true" role="dialog" style="display:none;">
+    <div class="instructions-content">
+      <button class="close-btn" id="close-instructions" aria-label="Close instructions">&times;</button>
+      <strong>How to Use</strong>
+      <ol>
+        <li>Tap the squares on the hand to show where the “germs” are.</li>
+        <li>Press <b>Next Stage</b> after each wash to see how clean your hand gets.</li>
+        <li>Watch the graph change as you wash better!</li>
+        <li>When you finish, write what you noticed in the reflection box.</li>
+        <li>You can save or copy your reflection at the end.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="main-container">
+    <div class="grid-container">
+      <div class="grid-title" id="stage-name">Before Washing</div>
+      <div class="grid-wrapper">
+        <div id="grid"></div>
+      </div>
+      <div id="count-display">Dirty squares selected: <span id="count">0</span></div>
+    </div>
+    <div class="chart-container">
+      <div class="chart-title">Dirty Area by Square</div>
+      <canvas id="resultsChart"></canvas>
+    </div>
+  </div>
+  <div class="button-row">
+    <button onclick="nextStage()">Next Stage</button>
+    <button onclick="resetGrid()">Reset Grid</button>
+    <button onclick="showReflection()">Finish & Reflect</button>
+    <button class="fullscreen-btn" id="fullscreenBtn" title="Toggle Fullscreen">⛶ Fullscreen</button>
+    <button onclick="startOver()" style="background: #8B0000; color: #fff; border: 2px solid #FDB927;">Start Over</button>
+  </div>
+  <div id="reflection">
+    <h2>Reflection</h2>
+    <p>What did you notice about handwashing?</p>
+    <label for="reflection-text">Your Reflection:</label>
+    <textarea id="reflection-text" placeholder="Type your thoughts here..."></textarea>
+    <div class="reflection-actions">
+      <button type="button" onclick="downloadReflection()">Download Reflection</button>
+      <button type="button" onclick="copyReflection()">Copy Reflection</button>
+      <span id="copy-feedback" style="display:none; color:#008000; margin-left:10px; font-weight:600;">Copied!</span>
+    </div>
+  </div>
+  <footer>
+    <div class="logo-bar">
+      <img src="foundation-logo.jpg" alt="Crows Foundation Logo" />
+      <img src="bibbulmund-logo.png" alt="Bibbulmun Fund Logo" />
+      <img src="anangu-logo.png" alt="Anangu Foundation Logo" />
+      <img src="NHC_Logo.jpg" alt="Nganampa Health Council Logo" />
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const grid = document.getElementById('grid');
+    const countDisplay = document.getElementById('count');
+    const stageName = document.getElementById('stage-name');
+    const stages = ['Before\nWashing', 'No\nSoap', 'With\nSoap', 'With\nSoap & Brush'];
+    const stageColors = ['rgba(139, 0, 0, 0.7)', 'rgba(0, 128, 0, 0.7)', 'rgba(0, 0, 139, 0.7)', 'rgba(253, 185, 39, 0.7)'];
+    const barColors = ['#8B0000', '#008000', '#00008B', '#FDB927'];
+    let currentStage = 0;
+    const stageCounts = [0, 0, 0, 0];
+    let chart;
+    let gridState = Array(4).fill(null).map(() => Array(100).fill(false));
+
+    // Persistence helpers
+    function saveState() {
+      const reflectionText = document.getElementById('reflection-text')?.value || '';
+      localStorage.setItem('gb_currentStage', JSON.stringify(currentStage));
+      localStorage.setItem('gb_stageCounts', JSON.stringify(stageCounts));
+      localStorage.setItem('gb_gridState', JSON.stringify(gridState));
+      localStorage.setItem('gb_reflection', reflectionText);
+    }
+    function loadState() {
+      const savedStage = localStorage.getItem('gb_currentStage');
+      const savedCounts = localStorage.getItem('gb_stageCounts');
+      const savedGrid = localStorage.getItem('gb_gridState');
+      const savedReflection = localStorage.getItem('gb_reflection');
+      if (savedStage) currentStage = JSON.parse(savedStage);
+      if (savedCounts) {
+        const arr = JSON.parse(savedCounts);
+        for (let i = 0; i < 4; i++) stageCounts[i] = arr[i] || 0;
+      }
+      if (savedGrid) gridState = JSON.parse(savedGrid);
+      if (savedReflection && document.getElementById('reflection-text')) {
+        document.getElementById('reflection-text').value = savedReflection;
+      }
+    }
+    function clearState() {
+      localStorage.removeItem('gb_currentStage');
+      localStorage.removeItem('gb_stageCounts');
+      localStorage.removeItem('gb_gridState');
+      localStorage.removeItem('gb_reflection');
+    }
+
+    function createGrid(animate = false) {
+      grid.innerHTML = '';
+      for (let i = 0; i < 100; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        if (animate) cell.classList.add('fade-out');
+        // Restore cell state from gridState
+        if (gridState[currentStage][i]) {
+          cell.classList.add('active');
+          cell.style.backgroundColor = stageColors[currentStage];
+        }
+        cell.addEventListener('click', () => {
+          cell.classList.toggle('active');
+          const isActive = cell.classList.contains('active');
+          cell.style.backgroundColor = isActive ? stageColors[currentStage] : 'transparent';
+          cell.classList.add('pop');
+          setTimeout(() => cell.classList.remove('pop'), 250);
+          gridState[currentStage][i] = isActive;
+          updateCount();
+          saveState();
+        });
+        cell.addEventListener('mousedown', e => e.preventDefault()); // Prevents drag highlight
+        grid.appendChild(cell);
+      }
+      if (animate) {
+        setTimeout(() => {
+          document.querySelectorAll('.cell').forEach(cell => {
+            cell.classList.remove('fade-out');
+            cell.classList.add('fade-in');
+            setTimeout(() => cell.classList.remove('fade-in'), 300);
+          });
+        }, 50);
+      }
+      updateCount();
+    }
+
+    function updateCount() {
+      const activeCells = document.querySelectorAll('.cell.active');
+      countDisplay.textContent = `${activeCells.length}`;
+      // Update gridState for current stage
+      document.querySelectorAll('.cell').forEach((cell, i) => {
+        gridState[currentStage][i] = cell.classList.contains('active');
+      });
+      saveState();
+    }
+
+    function nextStage() {
+      const activeCells = document.querySelectorAll('.cell.active');
+      stageCounts[currentStage] = activeCells.length;
+      saveState();
+
+      if (currentStage < stages.length - 1) {
+        currentStage++;
+        stageName.textContent = stages[currentStage].replace(/\n/g, '\n');
+        grid.classList.add('stage-fade');
+        setTimeout(() => {
+          grid.classList.remove('stage-fade');
+          createGrid(true);
+        }, 350);
+      }
+      drawChart();
+      saveState();
+    }
+
+    function resetGrid() {
+      // Only reset current stage's grid
+      gridState[currentStage] = Array(100).fill(false);
+      createGrid(true);
+      saveState();
+    }
+
+    function showReflection() {
+      document.getElementById('reflection').style.display = 'block';
+      document.getElementById('reflection').scrollIntoView({ behavior: 'smooth' });
+      saveState();
+    }
+
+    // Save reflection text on input
+    document.addEventListener('DOMContentLoaded', () => {
+      const reflectionInput = document.getElementById('reflection-text');
+      if (reflectionInput) {
+        reflectionInput.addEventListener('input', saveState);
+      }
+    });
+
+    function startOver() {
+      if (confirm('Are you sure you want to start over? All progress will be lost.')) {
+        clearState();
+        currentStage = 0;
+        for (let i = 0; i < 4; i++) stageCounts[i] = 0;
+        gridState = Array(4).fill(null).map(() => Array(100).fill(false));
+        if (document.getElementById('reflection-text')) document.getElementById('reflection-text').value = '';
+        stageName.textContent = stages[0].replace(/\n/g, '\n');
+        createGrid(true);
+        drawChart();
+      }
+    }
+
+    function drawChart() {
+      const ctx = document.getElementById('resultsChart').getContext('2d');
+
+      const dataset = {
+        label: '',
+        data: stageCounts,
+        backgroundColor: barColors,
+        borderColor: '#002B5C',
+        borderWidth: 1
+      };
+
+      if (chart) {
+        chart.data.datasets[0] = dataset;
+        chart.options.scales.y.ticks = {
+          stepSize: 1,
+          color: 'black',
+          font: { size: 16, family: 'Inter', weight: 'bold' },
+          callback: function(value) { return Number.isInteger(value) ? value : null; },
+          padding: 4
+        };
+        chart.options.scales.x.ticks = {
+          color: 'black',
+          font: { size: 16, family: 'Inter', weight: 'bold' },
+          callback: function(value) {
+            return this.getLabelForValue(value).split('\n');
+          },
+          padding: 4
+        };
+        chart.update();
+        return;
+      }
+
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: stages.map(label => label.split('\n').join('\n')),
+          datasets: [dataset]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 900, easing: 'easeOutBounce' },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1,
+                color: 'black',
+                font: { size: 16, family: 'Inter', weight: 'bold' },
+                callback: function(value) { return Number.isInteger(value) ? value : null; },
+                padding: 4
+              },
+              title: {
+                display: false
+              },
+              grid: {
+                drawTicks: true,
+                drawBorder: true,
+                color: '#e0e0e0',
+                lineWidth: 1.5
+              }
+            },
+            x: {
+              ticks: {
+                color: 'black',
+                font: { size: 16, family: 'Inter', weight: 'bold' },
+                callback: function(value) {
+                  return this.getLabelForValue(value).split('\n');
+                },
+                padding: 4
+              },
+              grid: {
+                drawTicks: false,
+                drawBorder: true,
+                color: '#e0e0e0',
+                lineWidth: 1.5
+              },
+              offset: true
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            title: { display: false }
+          }
+        }
+      });
+    }
+
+    // Fullscreen functionality
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+        fullscreenBtn.textContent = '⛶ Exit Fullscreen';
+      } else {
+        document.exitFullscreen();
+        fullscreenBtn.textContent = '⛶ Fullscreen';
+      }
+    });
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        fullscreenBtn.textContent = '⛶ Fullscreen';
+      } else {
+        fullscreenBtn.textContent = '⛶ Exit Fullscreen';
+      }
+    });
+
+    // Download Reflection as .txt file
+    function downloadReflection() {
+      const text = document.getElementById('reflection-text').value.trim();
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'reflection.txt';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 0);
+    }
+
+    // Copy Reflection to clipboard
+    function copyReflection() {
+      const text = document.getElementById('reflection-text').value.trim();
+      if (!navigator.clipboard) {
+        // fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      } else {
+        navigator.clipboard.writeText(text);
+      }
+      // Show feedback
+      const feedback = document.getElementById('copy-feedback');
+      feedback.style.display = 'inline';
+      setTimeout(() => { feedback.style.display = 'none'; }, 1200);
+    }
+
+    // Instructions modal logic
+    const helpBtn = document.getElementById('help-btn');
+    const instructionsModal = document.getElementById('instructions-modal');
+    const closeInstructions = document.getElementById('close-instructions');
+    helpBtn.addEventListener('click', () => {
+      instructionsModal.style.display = 'flex';
+      instructionsModal.focus();
+    });
+    closeInstructions.addEventListener('click', () => {
+      instructionsModal.style.display = 'none';
+      helpBtn.focus();
+    });
+    // Close modal on outside click
+    instructionsModal.addEventListener('mousedown', (e) => {
+      if (e.target === instructionsModal) {
+        instructionsModal.style.display = 'none';
+        helpBtn.focus();
+      }
+    });
+    // Close modal on Escape key
+    instructionsModal.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        instructionsModal.style.display = 'none';
+        helpBtn.focus();
+      }
+    });
+
+    // On load, restore state if present
+    loadState();
+    stageName.textContent = stages[currentStage].replace(/\n/g, '\n');
+    createGrid();
+    drawChart();
+    // Restore reflection text if present
+    if (document.getElementById('reflection-text')) {
+      document.getElementById('reflection-text').value = localStorage.getItem('gb_reflection') || '';
+    }
+  </script>
+</body>
+</html>
